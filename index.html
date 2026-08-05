@@ -53,73 +53,271 @@
   /* ---------- Ambient confetti drift ---------- */
   #petal-field{ position:fixed; inset:0; pointer-events:none; z-index:5; overflow:hidden; }
 
-  /* ---------- Envelope intro ---------- */
-  #site-content{ opacity:0; transition:opacity 0.8s ease; }
+  /* =========================================================
+     LUXURY INTRO — frosted glass invitation card
+     Self-contained module. Keeps the existing IDs
+     (#envelope-screen, #envelope-hint, #site-content, #music-mini)
+     so the reveal + music logic in the main script still works.
+  ========================================================= */
+  #site-content{ opacity:0; transition:opacity 1s ease; }
   #site-content.visible{ opacity:1; }
   body.locked{ overflow:hidden; height:100vh; }
 
+  /* ---------- full-screen stage ---------- */
   #envelope-screen{
     position:fixed; inset:0; z-index:100;
     display:flex; flex-direction:column; align-items:center; justify-content:center;
-    background:linear-gradient(160deg, var(--pink) 0%, var(--lavender) 50%, var(--mint) 100%);
-    transition:opacity 0.9s ease, visibility 0.9s ease;
+    overflow:hidden; cursor:pointer;
+    background:
+      radial-gradient(90% 70% at 22% 18%, #FDF3EA 0%, rgba(253,243,234,0) 62%),
+      radial-gradient(85% 70% at 80% 26%, #F8DDE8 0%, rgba(248,221,232,0) 60%),
+      radial-gradient(95% 80% at 62% 88%, #E4DAF6 0%, rgba(228,218,246,0) 62%),
+      linear-gradient(168deg, #FFFBF5 0%, #FAF0E8 45%, #F3E8F3 100%);
+    transition:opacity 1s cubic-bezier(.4,0,.2,1), visibility 1s;
   }
   #envelope-screen.hidden{ opacity:0; visibility:hidden; pointer-events:none; }
 
-  #envelope-screen .eyebrow{ color:var(--plum); opacity:0.75; margin-bottom:22px; }
+  /* slow "breathing" colour wash over the whole stage */
+  .intro-wash{
+    position:absolute; inset:-20%; pointer-events:none; z-index:0;
+    background:
+      radial-gradient(closest-side, rgba(248,203,221,0.45), transparent 72%) 18% 30%/58% 58% no-repeat,
+      radial-gradient(closest-side, rgba(220,206,245,0.40), transparent 72%) 82% 62%/62% 62% no-repeat,
+      radial-gradient(closest-side, rgba(252,231,172,0.28), transparent 72%) 50% 88%/52% 52% no-repeat;
+    filter:blur(38px);
+    animation:washBreathe 16s ease-in-out infinite;
+  }
+  @keyframes washBreathe{
+    0%,100%{ transform:scale(1) translateY(0); opacity:0.85; }
+    50%{ transform:scale(1.07) translateY(-1.5%); opacity:1; }
+  }
 
-  .envelope{
-    position:relative; width:min(78vw, 300px); aspect-ratio:3/2; cursor:pointer;
-    filter:drop-shadow(0 18px 34px rgba(75,59,84,0.28));
+  /* soft diagonal light rays */
+  .intro-rays{
+    position:absolute; inset:-30%; pointer-events:none; z-index:1;
+    background:repeating-linear-gradient(
+      104deg,
+      rgba(255,255,255,0) 0px,
+      rgba(255,255,255,0.30) 2px,
+      rgba(255,255,255,0) 130px
+    );
+    filter:blur(22px); opacity:0.5;
+    animation:raysDrift 22s ease-in-out infinite;
   }
-  .env-body{
-    position:absolute; inset:0; background:var(--white); border-radius:6px; overflow:hidden;
+  @keyframes raysDrift{
+    0%,100%{ transform:translateX(-2%) rotate(0deg); opacity:0.38; }
+    50%{ transform:translateX(2%) rotate(1.2deg); opacity:0.6; }
   }
-  .env-body::before, .env-body::after{
-    content:''; position:absolute; bottom:0; width:0; height:0;
-    border-style:solid;
+
+  /* ambient glow sitting directly behind the glass card */
+  .intro-glow{
+    position:absolute; z-index:2; pointer-events:none;
+    width:min(88vw, 560px); aspect-ratio:1/1; border-radius:50%;
+    background:radial-gradient(circle, rgba(255,241,214,0.55) 0%, rgba(255,241,214,0) 68%);
+    filter:blur(10px);
+    animation:glowBreathe 9s ease-in-out infinite;
   }
-  .env-body::before{
-    left:0; border-width:0 0 78px 150px; border-color:transparent transparent var(--pink) transparent;
+  @keyframes glowBreathe{
+    0%,100%{ opacity:0.7; transform:scale(1); }
+    50%{ opacity:1; transform:scale(1.05); }
   }
-  .env-body::after{
-    right:0; border-width:0 150px 78px 0; border-color:transparent transparent var(--lavender) transparent;
+
+  /* petals + dust are injected by JS into these layers */
+  .intro-petals, .intro-dust{
+    position:absolute; inset:0; pointer-events:none; overflow:hidden;
   }
-  .env-letter{
-    position:absolute; left:8%; right:8%; bottom:6%; height:78%;
-    background:var(--cream); border-radius:3px;
-    box-shadow:0 -4px 10px rgba(75,59,84,0.08);
-    transition:transform 1s cubic-bezier(.2,.8,.2,1);
-    z-index:2;
+  .intro-petals{ z-index:3; }
+  .intro-dust{ z-index:4; }
+
+  .intro-petal{
+    position:absolute; top:-12vh; will-change:transform;
+    border-radius:0 62% 0 62%; opacity:0.55;
+    animation:petalFall linear infinite;
+  }
+  @keyframes petalFall{
+    0%{ transform:translate(0,0) rotate(0deg); }
+    100%{ transform:translate(var(--drift,30px), 122vh) rotate(420deg); }
+  }
+  .intro-mote{
+    position:absolute; border-radius:50%; will-change:transform;
+    background:radial-gradient(circle, rgba(255,248,232,0.95), rgba(212,175,109,0));
+    animation:moteFloat linear infinite;
+  }
+  @keyframes moteFloat{
+    0%{ transform:translate(0,0) scale(0.7); opacity:0; }
+    15%{ opacity:0.75; }
+    85%{ opacity:0.5; }
+    100%{ transform:translate(var(--mx,20px), var(--my,-80px)) scale(1.15); opacity:0; }
+  }
+
+  /* ---------- the frosted glass invitation card ---------- */
+  .intro-stage{
+    position:relative; z-index:6;
+    perspective:1400px;
     display:flex; align-items:center; justify-content:center;
-    font-family:'Parisienne', cursive; font-size:1.4rem; color:var(--pink-deep);
-    text-align:center; padding:10px;
   }
-  .env-flap{
-    position:absolute; top:0; left:0; right:0; height:52%;
-    background:var(--pink); clip-path:polygon(0 0, 100% 0, 50% 100%);
-    transform-origin:top center; transition:transform 1s cubic-bezier(.3,.7,.3,1);
-    z-index:3;
+  .intro-card{
+    position:relative;
+    width:min(84vw, 420px);
+    padding:clamp(38px, 7vw, 58px) clamp(26px, 6vw, 46px);
+    border-radius:22px;
+    text-align:center;
+    background:linear-gradient(155deg, rgba(255,255,255,0.55) 0%, rgba(255,255,255,0.28) 100%);
+    -webkit-backdrop-filter:blur(22px) saturate(1.35);
+    backdrop-filter:blur(22px) saturate(1.35);
+    box-shadow:
+      0 22px 60px rgba(126,96,120,0.18),
+      0 8px 22px rgba(126,96,120,0.10),
+      inset 0 1px 1px rgba(255,255,255,0.75);
+    transform-style:preserve-3d;
+    animation:cardFloat 7s ease-in-out infinite;
+    transition:transform 0.5s cubic-bezier(.22,.75,.3,1), opacity 0.7s ease, filter 0.7s ease;
+    will-change:transform;
   }
-  .env-seal{
-    position:absolute; top:44%; left:50%; transform:translate(-50%,-50%);
-    width:52px; height:52px; border-radius:50%; background:var(--pink-deep);
-    color:var(--white); font-family:'Parisienne', cursive; font-size:1.3rem;
-    display:flex; align-items:center; justify-content:center;
-    box-shadow:0 6px 14px rgba(75,59,84,0.3); z-index:4;
-    transition:transform 0.5s ease, opacity 0.5s ease;
+  @keyframes cardFloat{
+    0%,100%{ transform:translateY(0); }
+    50%{ transform:translateY(-7px); }
+  }
+  /* thin gold border, drawn as a gradient ring so it can shimmer */
+  .intro-card::before{
+    content:''; position:absolute; inset:0; border-radius:22px; padding:1px;
+    background:linear-gradient(135deg, #C9A24B 0%, #F2D79B 22%, #FFF6DF 38%, #E4C583 56%, #C9A24B 78%, #F2D79B 100%);
+    background-size:250% 100%;
+    -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite:xor; mask-composite:exclude;
+    opacity:0.85; pointer-events:none;
+    animation:borderShimmer 9s ease-in-out infinite;
+  }
+  @keyframes borderShimmer{
+    0%,100%{ background-position:0% 0%; }
+    50%{ background-position:100% 0%; }
+  }
+  /* moving specular reflection across the glass */
+  .intro-card::after{
+    content:''; position:absolute; inset:0; border-radius:22px; overflow:hidden;
+    background:linear-gradient(102deg, transparent 32%, rgba(255,255,255,0.42) 46%, transparent 60%);
+    background-size:260% 100%;
+    pointer-events:none;
+    animation:glassSheen 11s ease-in-out infinite;
+  }
+  @keyframes glassSheen{
+    0%,100%{ background-position:130% 0%; }
+    50%{ background-position:-30% 0%; }
   }
 
-  .envelope.opening .env-flap{ transform:rotateX(-165deg); }
-  .envelope.opening .env-seal{ transform:translate(-50%,-50%) scale(0); opacity:0; }
-  .envelope.opening .env-letter{ transform:translateY(-58%); }
+  /* ---------- gold monogram ---------- */
+  .intro-monogram{
+    position:relative;
+    font-family:'Parisienne', cursive;
+    line-height:0.92;
+    margin-bottom:clamp(20px, 4vw, 28px);
+    display:flex; flex-direction:column; align-items:center;
+    /* metallic gold via a clipped gradient */
+    background:linear-gradient(160deg, #B98E3C 0%, #E8C87E 26%, #FFF4D8 42%, #D9B266 60%, #A97C31 82%, #E2BE74 100%);
+    -webkit-background-clip:text; background-clip:text;
+    -webkit-text-fill-color:transparent; color:transparent;
+    filter:drop-shadow(0 2px 3px rgba(150,110,50,0.28)) drop-shadow(0 0 14px rgba(226,190,116,0.30));
+    animation:monoGlow 6s ease-in-out infinite;
+  }
+  @keyframes monoGlow{
+    0%,100%{ filter:drop-shadow(0 2px 3px rgba(150,110,50,0.28)) drop-shadow(0 0 12px rgba(226,190,116,0.22)); }
+    50%{ filter:drop-shadow(0 2px 3px rgba(150,110,50,0.30)) drop-shadow(0 0 20px rgba(226,190,116,0.42)); }
+  }
+  .mono-k, .mono-v{ font-size:clamp(3.2rem, 13vw, 4.6rem); }
+  .mono-amp{ font-size:clamp(1.5rem, 6vw, 2.1rem); margin:-6px 0; opacity:0.92; }
 
+  /* shimmer sweep across the monogram every ~7s */
+  .intro-monogram .mono-shine{
+    position:absolute; inset:0; pointer-events:none; overflow:hidden;
+    -webkit-background-clip:border-box; background-clip:border-box;
+  }
+  .intro-monogram .mono-shine::before{
+    content:''; position:absolute; top:-30%; bottom:-30%; left:-55%; width:40%;
+    background:linear-gradient(100deg, transparent, rgba(255,255,255,0.85), transparent);
+    transform:rotate(16deg);
+    animation:monoShine 7s ease-in-out infinite;
+  }
+  @keyframes monoShine{
+    0%, 62%{ left:-55%; opacity:0; }
+    68%{ opacity:1; }
+    88%, 100%{ left:125%; opacity:0; }
+  }
+
+  /* ---------- card typography ---------- */
+  .intro-rule{
+    width:56px; height:1px; margin:0 auto clamp(18px, 3.5vw, 24px);
+    background:linear-gradient(90deg, transparent, #C9A24B, transparent);
+    position:relative;
+  }
+  .intro-rule::before{
+    content:'✦'; position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
+    font-size:0.55rem; color:#C9A24B;
+  }
+  .intro-invite{
+    font-family:'Cormorant Garamond', serif; font-style:italic;
+    font-size:clamp(0.92rem, 3.4vw, 1.06rem); line-height:1.75;
+    color:#6E5F72; margin-bottom:clamp(16px, 3vw, 22px);
+  }
+  .intro-names{
+    font-family:'Parisienne', cursive;
+    font-size:clamp(1.8rem, 7vw, 2.4rem);
+    color:#B8637F; margin-bottom:10px;
+  }
+  .intro-date{
+    font-family:'Jost', sans-serif; font-size:0.68rem;
+    letter-spacing:0.32em; text-transform:uppercase; color:#A98544;
+  }
+
+  /* ---------- prompt ---------- */
   #envelope-hint{
-    margin-top:26px; font-family:'Jost', sans-serif; font-size:0.72rem; letter-spacing:0.22em;
-    text-transform:uppercase; color:var(--plum-soft);
-    animation:hintPulse 2.2s ease-in-out infinite;
+    position:relative; z-index:6;
+    margin-top:clamp(28px, 5vw, 40px);
+    font-family:'Jost', sans-serif; font-size:0.68rem;
+    letter-spacing:0.3em; text-transform:uppercase; color:#8A7A6B;
+    animation:hintPulse 3s ease-in-out infinite;
+    transition:opacity 0.5s ease;
   }
-  @keyframes hintPulse{ 0%,100%{ opacity:0.55; } 50%{ opacity:1; } }
+  @keyframes hintPulse{ 0%,100%{ opacity:0.45; } 50%{ opacity:0.95; } }
+
+  /* particles the glass dissolves into, injected by JS */
+  .intro-shards{ position:absolute; inset:0; pointer-events:none; z-index:7; overflow:visible; }
+  .intro-shard{
+    position:absolute; border-radius:50%; opacity:0;
+    background:radial-gradient(circle, rgba(255,252,244,0.95), rgba(233,203,146,0));
+    will-change:transform, opacity;
+  }
+  .intro-shard.fly{ animation:shardDrift cubic-bezier(.18,.7,.3,1) forwards; }
+  @keyframes shardDrift{
+    0%{ opacity:0; transform:translate(0,0) scale(0.5); }
+    18%{ opacity:0.95; }
+    100%{ opacity:0; transform:translate(var(--sx), var(--sy)) scale(1.25); }
+  }
+
+  /* ---------- dissolve sequence (~2s) ---------- */
+  #envelope-screen.dissolving .intro-card{
+    animation:cardDissolve 1.25s cubic-bezier(.4,0,.2,1) 0.32s forwards;
+  }
+  @keyframes cardDissolve{
+    0%{ transform:scale(1); opacity:1; filter:blur(0px); }
+    30%{ transform:scale(0.95); opacity:0.9; filter:blur(0.5px); }
+    100%{ transform:scale(0.93); opacity:0; filter:blur(7px); }
+  }
+  /* the monogram flares once, right before the glass goes */
+  #envelope-screen.dissolving .intro-monogram{
+    animation:monoFlare 0.6s ease-out forwards;
+  }
+  @keyframes monoFlare{
+    0%{ filter:drop-shadow(0 2px 3px rgba(150,110,50,0.28)) drop-shadow(0 0 12px rgba(226,190,116,0.25)); }
+    45%{ filter:drop-shadow(0 2px 4px rgba(150,110,50,0.35)) drop-shadow(0 0 34px rgba(255,235,180,0.95)); }
+    100%{ filter:drop-shadow(0 2px 3px rgba(150,110,50,0.28)) drop-shadow(0 0 16px rgba(226,190,116,0.35)); }
+  }
+  #envelope-screen.dissolving #envelope-hint{ opacity:0; }
+  #envelope-screen.dissolving .intro-wash,
+  #envelope-screen.dissolving .intro-rays,
+  #envelope-screen.dissolving .intro-glow,
+  #envelope-screen.dissolving .intro-petals{
+    opacity:0; transition:opacity 1.1s ease 0.55s;
+  }
 
   #music-mini{
     position:fixed; bottom:22px; right:22px; z-index:70;
@@ -134,9 +332,20 @@
   #music-mini.playing .note{ animation:noteSpin 3s linear infinite; display:inline-block; }
   @keyframes noteSpin{ from{ transform:rotate(0deg);} to{ transform:rotate(360deg);} }
 
-  @media (prefers-reduced-motion: reduce){
-    .env-flap, .env-letter, .env-seal, #envelope-screen{ transition:none !important; }
+  @media (max-width:560px){
+    .intro-card{ width:min(88vw, 360px); border-radius:18px; }
+    .intro-card::before, .intro-card::after{ border-radius:18px; }
   }
+
+  @media (prefers-reduced-motion: reduce){
+    .intro-wash, .intro-rays, .intro-glow, .intro-card, .intro-card::before,
+    .intro-card::after, .intro-monogram, .mono-shine::before, .intro-petal,
+    .intro-mote, .intro-shard, #envelope-hint{
+      animation:none !important;
+    }
+    #envelope-screen.dissolving .intro-card{ opacity:0; transition:opacity 0.4s ease; }
+  }
+
   .petal{
     position:absolute; top:-6vh; opacity:0.9; will-change:transform;
     animation-name:fall; animation-timing-function:linear; animation-iteration-count:infinite;
@@ -361,15 +570,42 @@
 </head>
 <body class="locked">
 
-<div id="envelope-screen">
-  <p class="eyebrow">You're Invited</p>
-  <div class="envelope" id="envelope" role="button" tabindex="0" aria-label="Open your invitation">
-    <div class="env-letter">Keenan<br>&amp;<br>Vania</div>
-    <div class="env-body"></div>
-    <div class="env-flap"></div>
-    <div class="env-seal">K&amp;V</div>
+<div id="envelope-screen" role="button" tabindex="0" aria-label="Enter the wedding invitation">
+
+  <!-- ambient background layers -->
+  <div class="intro-wash" aria-hidden="true"></div>
+  <div class="intro-rays" aria-hidden="true"></div>
+  <div class="intro-glow" aria-hidden="true"></div>
+  <div class="intro-petals" id="intro-petals" aria-hidden="true"></div>
+  <div class="intro-dust" id="intro-dust" aria-hidden="true"></div>
+
+  <!-- frosted glass invitation card -->
+  <div class="intro-stage">
+    <div class="intro-card" id="intro-card">
+      <div class="intro-monogram">
+        <span class="mono-k">K</span>
+        <span class="mono-amp">&amp;</span>
+        <span class="mono-v">V</span>
+        <span class="mono-shine" aria-hidden="true"></span>
+      </div>
+
+      <div class="intro-rule" aria-hidden="true"></div>
+
+      <p class="intro-invite">
+        Together with their families<br>
+        joyfully invite you to celebrate<br>
+        their wedding
+      </p>
+
+      <p class="intro-names">Keenan &amp; Vania</p>
+      <p class="intro-date">29 December 2026</p>
+    </div>
   </div>
-  <p id="envelope-hint">tap the envelope to open</p>
+
+  <!-- glass dissolves into these on click -->
+  <div class="intro-shards" id="intro-shards" aria-hidden="true"></div>
+
+  <p id="envelope-hint">Tap anywhere to begin</p>
 </div>
 
 <div id="yt-player-box" style="position:absolute; width:1px; height:1px; overflow:hidden; opacity:0; pointer-events:none;">
@@ -597,17 +833,24 @@
 </div>
 
 <script>
-  // ---------- Envelope intro + background music ----------
-  const envelope = document.getElementById('envelope');
-  const envelopeScreen = document.getElementById('envelope-screen');
-  const envelopeHint = document.getElementById('envelope-hint');
-  const siteContent = document.getElementById('site-content');
-  const musicMini = document.getElementById('music-mini');
-  let ytPlayer = null;
-  let ytReady = false;
-  let wantsPlay = false;
-  let opened = false;
+  // ---------- Luxury intro + background music ----------
+  const introScreen  = document.getElementById('envelope-screen');
+  const introCard    = document.getElementById('intro-card');
+  const introHint    = document.getElementById('envelope-hint');
+  const siteContent  = document.getElementById('site-content');
+  const musicMini    = document.getElementById('music-mini');
+  const petalLayer   = document.getElementById('intro-petals');
+  const dustLayer    = document.getElementById('intro-dust');
+  const shardLayer   = document.getElementById('intro-shards');
 
+  const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  let ytPlayer  = null;
+  let ytReady   = false;
+  let wantsPlay = false;
+  let opened    = false;
+
+  /* ---- YouTube background audio (hidden 1x1 player) ---- */
   const ytTag = document.createElement('script');
   ytTag.src = "https://www.youtube.com/iframe_api";
   document.head.appendChild(ytTag);
@@ -629,38 +872,151 @@
     if(!ytReady){ wantsPlay = true; return; }
     ytPlayer.playVideo();
     musicMini.classList.add('playing');
-    musicMini.querySelector('.note').textContent = '🎶';
+    musicMini.querySelector('.note').textContent = '\u{1F3B6}';
   }
   function stopMusic(){
     if(ytReady) ytPlayer.pauseVideo();
     musicMini.classList.remove('playing');
-    musicMini.querySelector('.note').textContent = '🎵';
+    musicMini.querySelector('.note').textContent = '\u{1F3B5}';
   }
 
-  function openEnvelope(){
+  /* ---- Ambient petals + dust motes (drift continuously before the click) ---- */
+  const PETAL_TINTS = ['#F7CBDD', '#E8CFEF', '#FBE3D3', '#EFD9F0'];
+
+  function buildAmbience(){
+    if(prefersReducedMotion) return;
+    const isNarrow   = window.innerWidth < 600;
+    const petalCount = isNarrow ? 9  : 16;
+    const dustCount  = isNarrow ? 14 : 24;
+
+    for(let i = 0; i < petalCount; i++){
+      const petal = document.createElement('div');
+      petal.className = 'intro-petal';
+      const size = 7 + Math.random() * 9;
+      petal.style.left              = (Math.random() * 100) + 'vw';
+      petal.style.width             = size + 'px';
+      petal.style.height            = (size * 1.25) + 'px';
+      petal.style.background        = PETAL_TINTS[Math.floor(Math.random() * PETAL_TINTS.length)];
+      petal.style.animationDuration = (18 + Math.random() * 16) + 's';
+      petal.style.animationDelay    = (Math.random() * -30) + 's';
+      petal.style.setProperty('--drift', (Math.random() * 90 - 45) + 'px');
+      petalLayer.appendChild(petal);
+    }
+
+    for(let i = 0; i < dustCount; i++){
+      const mote = document.createElement('div');
+      mote.className = 'intro-mote';
+      const size = 2 + Math.random() * 3;
+      mote.style.left              = (Math.random() * 100) + '%';
+      mote.style.top               = (35 + Math.random() * 65) + '%';
+      mote.style.width             = size + 'px';
+      mote.style.height            = size + 'px';
+      mote.style.animationDuration = (11 + Math.random() * 10) + 's';
+      mote.style.animationDelay    = (Math.random() * -18) + 's';
+      mote.style.setProperty('--mx', (Math.random() * 70 - 35) + 'px');
+      mote.style.setProperty('--my', (-90 - Math.random() * 90) + 'px');
+      dustLayer.appendChild(mote);
+    }
+  }
+  buildAmbience();
+
+  /* ---- Glass dissolve: spawn glowing particles across the card's footprint ---- */
+  function dissolveIntoParticles(){
+    if(prefersReducedMotion) return;
+    const cardRect   = introCard.getBoundingClientRect();
+    const layerRect  = shardLayer.getBoundingClientRect();
+    const count      = window.innerWidth < 600 ? 110 : 190;
+
+    const frag = document.createDocumentFragment();
+    for(let i = 0; i < count; i++){
+      const shard = document.createElement('div');
+      shard.className = 'intro-shard';
+
+      // seed each particle at a random point within the card itself
+      const x = cardRect.left - layerRect.left + Math.random() * cardRect.width;
+      const y = cardRect.top  - layerRect.top  + Math.random() * cardRect.height;
+      const size = 1.5 + Math.random() * 4;
+
+      // drift outward from the card's centre
+      const angle    = Math.atan2(y - (cardRect.top - layerRect.top + cardRect.height / 2),
+                                  x - (cardRect.left - layerRect.left + cardRect.width / 2));
+      const distance = 70 + Math.random() * 260;
+
+      shard.style.left   = x + 'px';
+      shard.style.top    = y + 'px';
+      shard.style.width  = size + 'px';
+      shard.style.height = size + 'px';
+      shard.style.setProperty('--sx', (Math.cos(angle) * distance).toFixed(1) + 'px');
+      shard.style.setProperty('--sy', (Math.sin(angle) * distance - 30).toFixed(1) + 'px');
+      shard.style.animationDuration = (0.9 + Math.random() * 0.7) + 's';
+      shard.style.animationDelay    = (Math.random() * 0.35) + 's';
+
+      frag.appendChild(shard);
+    }
+    shardLayer.appendChild(frag);
+
+    requestAnimationFrame(() => {
+      shardLayer.querySelectorAll('.intro-shard').forEach(s => s.classList.add('fly'));
+    });
+  }
+
+  /* ---- The opening sequence (~2s) ----
+       0.00s  monogram flares
+       0.32s  glass card scales to 95% and dissolves
+       0.35s  particles bloom outward
+       0.55s  ambient background layers fade
+       2.00s  intro clears, wedding site fades in underneath          */
+  function beginExperience(){
     if(opened) return;
     opened = true;
-    envelope.classList.add('opening');
-    envelopeHint.style.opacity = '0';
+
+    introScreen.classList.add('dissolving');
+    introScreen.style.cursor = 'default';
     startMusic();
     musicMini.classList.add('show');
 
-    setTimeout(()=>{
-      envelopeScreen.classList.add('hidden');
+    setTimeout(dissolveIntoParticles, 350);
+
+    setTimeout(() => {
+      introScreen.classList.add('hidden');
       siteContent.classList.add('visible');
       document.body.classList.remove('locked');
-    }, 950);
+    }, 2000);
   }
 
-  envelope.addEventListener('click', openEnvelope);
-  envelope.addEventListener('keydown', (e)=>{
-    if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); openEnvelope(); }
+  introScreen.addEventListener('click', beginExperience);
+  introScreen.addEventListener('keydown', (e) => {
+    if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); beginExperience(); }
   });
 
-  musicMini.addEventListener('click', ()=>{
-    const isPlaying = musicMini.classList.contains('playing');
-    if(isPlaying){ stopMusic(); } else { startMusic(); }
+  musicMini.addEventListener('click', () => {
+    musicMini.classList.contains('playing') ? stopMusic() : startMusic();
   });
+
+  /* ---- Desktop-only 3D tilt on the glass card (skipped on touch devices) ---- */
+  if(window.matchMedia('(hover: hover)').matches && !prefersReducedMotion){
+    let tilting = false;
+
+    introScreen.addEventListener('mousemove', (e) => {
+      if(opened || tilting) return;
+      tilting = true;
+      requestAnimationFrame(() => {
+        const rect = introCard.getBoundingClientRect();
+        const px = (e.clientX - (rect.left + rect.width  / 2)) / (window.innerWidth  / 2);
+        const py = (e.clientY - (rect.top  + rect.height / 2)) / (window.innerHeight / 2);
+        introCard.style.transform =
+          `rotateX(${(-py * 5).toFixed(2)}deg) rotateY(${(px * 5).toFixed(2)}deg) translateZ(0)`;
+        introCard.style.animationPlayState = 'paused';
+        tilting = false;
+      });
+    });
+
+    introScreen.addEventListener('mouseleave', () => {
+      if(opened) return;
+      introCard.style.transform = '';
+      introCard.style.animationPlayState = '';
+    });
+  }
 
   // ---------- Countdown ----------
   const weddingDate = new Date("2026-12-29T00:00:00+05:30").getTime();
