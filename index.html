@@ -54,270 +54,110 @@
   #petal-field{ position:fixed; inset:0; pointer-events:none; z-index:5; overflow:hidden; }
 
   /* =========================================================
-     LUXURY INTRO — frosted glass invitation card
-     Self-contained module. Keeps the existing IDs
-     (#envelope-screen, #envelope-hint, #site-content, #music-mini)
-     so the reveal + music logic in the main script still works.
+     ENVELOPE INTRO — blush-pink lace envelope
+     Keeps the IDs #envelope-screen, #envelope-hint, #site-content
+     and #music-mini so the reveal + music logic still works.
   ========================================================= */
   #site-content{ opacity:0; transition:opacity 1s ease; }
   #site-content.visible{ opacity:1; }
   body.locked{ overflow:hidden; height:100vh; }
 
-  /* ---------- full-screen stage ---------- */
   #envelope-screen{
     position:fixed; inset:0; z-index:100;
-    display:flex; flex-direction:column; align-items:center; justify-content:center;
-    overflow:hidden; cursor:pointer;
+    display:grid; place-items:center; text-align:center;
+    padding:32px 22px; overflow:hidden; cursor:pointer;
     background:
-      radial-gradient(90% 70% at 22% 18%, #FDF3EA 0%, rgba(253,243,234,0) 62%),
-      radial-gradient(85% 70% at 80% 26%, #F8DDE8 0%, rgba(248,221,232,0) 60%),
-      radial-gradient(95% 80% at 62% 88%, #E4DAF6 0%, rgba(228,218,246,0) 62%),
-      linear-gradient(168deg, #FFFBF5 0%, #FAF0E8 45%, #F3E8F3 100%);
+      radial-gradient(circle at 50% 25%, rgba(255,245,247,.34), transparent 34%),
+      linear-gradient(160deg, #eeb6c5 0%, #e7a4b7 46%, #d989a3 100%);
     transition:opacity 1s cubic-bezier(.4,0,.2,1), visibility 1s;
   }
   #envelope-screen.hidden{ opacity:0; visibility:hidden; pointer-events:none; }
 
-  /* slow "breathing" colour wash over the whole stage */
-  .intro-wash{
-    position:absolute; inset:-20%; pointer-events:none; z-index:0;
-    background:
-      radial-gradient(closest-side, rgba(248,203,221,0.45), transparent 72%) 18% 30%/58% 58% no-repeat,
-      radial-gradient(closest-side, rgba(220,206,245,0.40), transparent 72%) 82% 62%/62% 62% no-repeat,
-      radial-gradient(closest-side, rgba(252,231,172,0.28), transparent 72%) 50% 88%/52% 52% no-repeat;
-    filter:blur(38px);
-    animation:washBreathe 16s ease-in-out infinite;
+  .env-grain{
+    position:absolute; inset:0; opacity:.13; pointer-events:none;
+    background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 160 160' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.5'/%3E%3C/svg%3E");
   }
-  @keyframes washBreathe{
-    0%,100%{ transform:scale(1) translateY(0); opacity:0.85; }
-    50%{ transform:scale(1.07) translateY(-1.5%); opacity:1; }
+  .env-inner{ position:relative; z-index:2; width:100%; max-width:540px; display:flex; flex-direction:column; align-items:center; }
+
+  .env-date{
+    margin:0 0 30px; padding-left:.32em;
+    font-family:'Cormorant Garamond', serif; font-size:16px; font-weight:500;
+    letter-spacing:.32em; color:#fff8f5;
+    text-shadow:0 2px 12px rgba(92,35,53,.15);
+    transition:opacity .5s ease;
   }
 
-  /* soft diagonal light rays */
-  .intro-rays{
-    position:absolute; inset:-30%; pointer-events:none; z-index:1;
-    background:repeating-linear-gradient(
-      104deg,
-      rgba(255,255,255,0) 0px,
-      rgba(255,255,255,0.30) 2px,
-      rgba(255,255,255,0) 130px
-    );
-    filter:blur(22px); opacity:0.5;
-    animation:raysDrift 22s ease-in-out infinite;
+  .env-wrap{
+    display:block; margin:0 auto; padding:0; border:0; background:none; cursor:pointer;
+    width:min(88vw, 390px); aspect-ratio:1.38; position:relative;
+    filter:drop-shadow(0 22px 18px rgba(0,0,0,.22));
+    -webkit-tap-highlight-color:transparent;
   }
-  @keyframes raysDrift{
-    0%,100%{ transform:translateX(-2%) rotate(0deg); opacity:0.38; }
-    50%{ transform:translateX(2%) rotate(1.2deg); opacity:0.6; }
+  .env-wrap:focus-visible{ outline:2px solid #fff; outline-offset:8px; border-radius:4px; }
+
+  .env{
+    position:absolute; inset:5% 1%; border-radius:2px; background:#f5e9e2; overflow:visible;
+    box-shadow:0 22px 45px rgba(102,35,57,.22), 0 3px 8px rgba(102,35,57,.12);
+  }
+  .env-body{ position:absolute; inset:0; border-radius:2px; background:linear-gradient(145deg,#f8eee8,#e9d8d0); }
+  .env-body:before, .env-body:after{ content:""; position:absolute; bottom:0; width:70%; height:100%; background:#eadbd4; }
+  .env-body:before{ left:0;  clip-path:polygon(0 0, 100% 100%, 0 100%); }
+  .env-body:after{ right:0; clip-path:polygon(100% 0, 100% 100%, 0 100%); }
+
+  .env-flap{
+    position:absolute; left:0; right:0; top:0; height:61%; z-index:4;
+    background:linear-gradient(160deg,#fbf1eb,#e8d6cf);
+    clip-path:polygon(0 0, 100% 0, 50% 100%);
+    transform-origin:top; transition:transform 1s cubic-bezier(.2,.75,.2,1);
+  }
+  .env-liner{
+    position:absolute; z-index:3; left:50%; top:0; width:58%; height:48%;
+    transform:translateX(-50%); background:#eab3c0; opacity:.72;
+    clip-path:polygon(0 0, 100% 0, 50% 100%);
   }
 
-  /* ambient glow sitting directly behind the glass card */
-  .intro-glow{
-    position:absolute; z-index:2; pointer-events:none;
-    width:min(88vw, 560px); aspect-ratio:1/1; border-radius:50%;
-    background:radial-gradient(circle, rgba(255,241,214,0.55) 0%, rgba(255,241,214,0) 68%);
-    filter:blur(10px);
-    animation:glowBreathe 9s ease-in-out infinite;
+  .env-lace{ position:absolute; z-index:5; opacity:.95; }
+  .env-lace-top{
+    left:0; right:0; top:0; height:16px;
+    background:repeating-linear-gradient(90deg, transparent 0 6px, #fff 7px 10px, transparent 11px 15px);
   }
-  @keyframes glowBreathe{
-    0%,100%{ opacity:0.7; transform:scale(1); }
-    50%{ opacity:1; transform:scale(1.05); }
+  .env-lace-left, .env-lace-right{
+    top:12%; bottom:0; width:15px;
+    background:repeating-linear-gradient(0deg, transparent 0 6px, #fff 7px 10px, transparent 11px 15px);
+  }
+  .env-lace-left{ left:0; }
+  .env-lace-right{ right:0; }
+
+  .env-seal{
+    position:absolute; z-index:8; left:50%; top:58%; transform:translate(-50%,-50%);
+    width:58px; height:58px; border-radius:50%;
+    display:grid; place-items:center;
+    background:#b9657d; border:3px solid #f5e6df; color:#f9eee4;
+    font-family:'Parisienne', cursive; font-size:22px; line-height:1;
+    box-shadow:0 5px 15px rgba(80,30,45,.22);
+    transition:opacity .8s ease, transform .8s ease;
   }
 
-  /* petals + dust are injected by JS into these layers */
-  .intro-petals, .intro-dust{
-    position:absolute; inset:0; pointer-events:none; overflow:hidden;
-  }
-  .intro-petals{ z-index:3; }
-  .intro-dust{ z-index:4; }
-
-  .intro-petal{
-    position:absolute; top:-12vh; will-change:transform;
-    border-radius:0 62% 0 62%; opacity:0.55;
-    animation:petalFall linear infinite;
-  }
-  @keyframes petalFall{
-    0%{ transform:translate(0,0) rotate(0deg); }
-    100%{ transform:translate(var(--drift,30px), 122vh) rotate(420deg); }
-  }
-  .intro-mote{
-    position:absolute; border-radius:50%; will-change:transform;
-    background:radial-gradient(circle, rgba(255,248,232,0.95), rgba(212,175,109,0));
-    animation:moteFloat linear infinite;
-  }
-  @keyframes moteFloat{
-    0%{ transform:translate(0,0) scale(0.7); opacity:0; }
-    15%{ opacity:0.75; }
-    85%{ opacity:0.5; }
-    100%{ transform:translate(var(--mx,20px), var(--my,-80px)) scale(1.15); opacity:0; }
-  }
-
-  /* ---------- the frosted glass invitation card ---------- */
-  .intro-stage{
-    position:relative; z-index:6;
-    perspective:1400px;
-    display:flex; align-items:center; justify-content:center;
-  }
-  .intro-card{
-    position:relative;
-    width:min(84vw, 420px);
-    padding:clamp(38px, 7vw, 58px) clamp(26px, 6vw, 46px);
-    border-radius:22px;
-    text-align:center;
-    background:linear-gradient(155deg, rgba(255,255,255,0.55) 0%, rgba(255,255,255,0.28) 100%);
-    -webkit-backdrop-filter:blur(22px) saturate(1.35);
-    backdrop-filter:blur(22px) saturate(1.35);
-    box-shadow:
-      0 22px 60px rgba(126,96,120,0.18),
-      0 8px 22px rgba(126,96,120,0.10),
-      inset 0 1px 1px rgba(255,255,255,0.75);
-    transform-style:preserve-3d;
-    animation:cardFloat 7s ease-in-out infinite;
-    transition:transform 0.5s cubic-bezier(.22,.75,.3,1), opacity 0.7s ease, filter 0.7s ease;
-    will-change:transform;
-  }
-  @keyframes cardFloat{
-    0%,100%{ transform:translateY(0); }
-    50%{ transform:translateY(-7px); }
-  }
-  /* thin gold border, drawn as a gradient ring so it can shimmer */
-  .intro-card::before{
-    content:''; position:absolute; inset:0; border-radius:22px; padding:1px;
-    background:linear-gradient(135deg, #C9A24B 0%, #F2D79B 22%, #FFF6DF 38%, #E4C583 56%, #C9A24B 78%, #F2D79B 100%);
-    background-size:250% 100%;
-    -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-    -webkit-mask-composite:xor; mask-composite:exclude;
-    opacity:0.85; pointer-events:none;
-    animation:borderShimmer 9s ease-in-out infinite;
-  }
-  @keyframes borderShimmer{
-    0%,100%{ background-position:0% 0%; }
-    50%{ background-position:100% 0%; }
-  }
-  /* moving specular reflection across the glass */
-  .intro-card::after{
-    content:''; position:absolute; inset:0; border-radius:22px; overflow:hidden;
-    background:linear-gradient(102deg, transparent 32%, rgba(255,255,255,0.42) 46%, transparent 60%);
-    background-size:260% 100%;
-    pointer-events:none;
-    animation:glassSheen 11s ease-in-out infinite;
-  }
-  @keyframes glassSheen{
-    0%,100%{ background-position:130% 0%; }
-    50%{ background-position:-30% 0%; }
-  }
-
-  /* ---------- gold monogram ---------- */
-  .intro-monogram{
-    position:relative;
-    font-family:'Parisienne', cursive;
-    line-height:0.92;
-    margin-bottom:clamp(20px, 4vw, 28px);
-    display:flex; flex-direction:column; align-items:center;
-    /* metallic gold via a clipped gradient */
-    background:linear-gradient(160deg, #B98E3C 0%, #E8C87E 26%, #FFF4D8 42%, #D9B266 60%, #A97C31 82%, #E2BE74 100%);
-    -webkit-background-clip:text; background-clip:text;
-    -webkit-text-fill-color:transparent; color:transparent;
-    filter:drop-shadow(0 2px 3px rgba(150,110,50,0.28)) drop-shadow(0 0 14px rgba(226,190,116,0.30));
-    animation:monoGlow 6s ease-in-out infinite;
-  }
-  @keyframes monoGlow{
-    0%,100%{ filter:drop-shadow(0 2px 3px rgba(150,110,50,0.28)) drop-shadow(0 0 12px rgba(226,190,116,0.22)); }
-    50%{ filter:drop-shadow(0 2px 3px rgba(150,110,50,0.30)) drop-shadow(0 0 20px rgba(226,190,116,0.42)); }
-  }
-  .mono-k, .mono-v{ font-size:clamp(3.2rem, 13vw, 4.6rem); }
-  .mono-amp{ font-size:clamp(1.5rem, 6vw, 2.1rem); margin:-6px 0; opacity:0.92; }
-
-  /* shimmer sweep across the monogram every ~7s */
-  .intro-monogram .mono-shine{
-    position:absolute; inset:0; pointer-events:none; overflow:hidden;
-    -webkit-background-clip:border-box; background-clip:border-box;
-  }
-  .intro-monogram .mono-shine::before{
-    content:''; position:absolute; top:-30%; bottom:-30%; left:-55%; width:40%;
-    background:linear-gradient(100deg, transparent, rgba(255,255,255,0.85), transparent);
-    transform:rotate(16deg);
-    animation:monoShine 7s ease-in-out infinite;
-  }
-  @keyframes monoShine{
-    0%, 62%{ left:-55%; opacity:0; }
-    68%{ opacity:1; }
-    88%, 100%{ left:125%; opacity:0; }
-  }
-
-  /* ---------- card typography ---------- */
-  .intro-rule{
-    width:56px; height:1px; margin:0 auto clamp(18px, 3.5vw, 24px);
-    background:linear-gradient(90deg, transparent, #C9A24B, transparent);
-    position:relative;
-  }
-  .intro-rule::before{
-    content:'✦'; position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
-    font-size:0.55rem; color:#C9A24B;
-  }
-  .intro-invite{
-    font-family:'Cormorant Garamond', serif; font-style:italic;
-    font-size:clamp(0.92rem, 3.4vw, 1.06rem); line-height:1.75;
-    color:#6E5F72; margin-bottom:clamp(16px, 3vw, 22px);
-  }
-  .intro-names{
-    font-family:'Parisienne', cursive;
-    font-size:clamp(1.8rem, 7vw, 2.4rem);
-    color:#B8637F; margin-bottom:10px;
-  }
-  .intro-date{
-    font-family:'Jost', sans-serif; font-size:0.68rem;
-    letter-spacing:0.32em; text-transform:uppercase; color:#A98544;
+  /* opening: flap lifts, seal melts away, then the whole envelope floats up */
+  .env-wrap.open .env-flap{ transform:rotateX(170deg); }
+  .env-wrap.open .env-seal{ opacity:0; transform:translate(-50%,-50%) scale(.7); }
+  #envelope-screen.opening .env-wrap{ animation:envLift 1.3s cubic-bezier(.5,0,.3,1) .8s forwards; }
+  #envelope-screen.opening .env-date{ opacity:0; }
+  @keyframes envLift{
+    from{ transform:translateY(0) scale(1); opacity:1; }
+    to{ transform:translateY(-12vh) scale(.94); opacity:0; }
   }
 
   /* ---------- prompt ---------- */
   #envelope-hint{
-    position:relative; z-index:6;
-    margin-top:clamp(28px, 5vw, 40px);
-    font-family:'Jost', sans-serif; font-size:0.68rem;
-    letter-spacing:0.3em; text-transform:uppercase; color:#8A7A6B;
+    margin-top:clamp(26px, 5vw, 38px); padding-left:.3em;
+    font-family:'Jost', sans-serif; font-size:.68rem;
+    letter-spacing:.3em; text-transform:uppercase; color:var(--plum);
     animation:hintPulse 3s ease-in-out infinite;
-    transition:opacity 0.5s ease;
+    transition:opacity .5s ease;
   }
-  @keyframes hintPulse{ 0%,100%{ opacity:0.45; } 50%{ opacity:0.95; } }
-
-  /* particles the glass dissolves into, injected by JS */
-  .intro-shards{ position:absolute; inset:0; pointer-events:none; z-index:7; overflow:visible; }
-  .intro-shard{
-    position:absolute; border-radius:50%; opacity:0;
-    background:radial-gradient(circle, rgba(255,252,244,0.95), rgba(233,203,146,0));
-    will-change:transform, opacity;
-  }
-  .intro-shard.fly{ animation:shardDrift cubic-bezier(.18,.7,.3,1) forwards; }
-  @keyframes shardDrift{
-    0%{ opacity:0; transform:translate(0,0) scale(0.5); }
-    18%{ opacity:0.95; }
-    100%{ opacity:0; transform:translate(var(--sx), var(--sy)) scale(1.25); }
-  }
-
-  /* ---------- dissolve sequence (~2s) ---------- */
-  #envelope-screen.dissolving .intro-card{
-    animation:cardDissolve 1.25s cubic-bezier(.4,0,.2,1) 0.32s forwards;
-  }
-  @keyframes cardDissolve{
-    0%{ transform:scale(1); opacity:1; filter:blur(0px); }
-    30%{ transform:scale(0.95); opacity:0.9; filter:blur(0.5px); }
-    100%{ transform:scale(0.93); opacity:0; filter:blur(7px); }
-  }
-  /* the monogram flares once, right before the glass goes */
-  #envelope-screen.dissolving .intro-monogram{
-    animation:monoFlare 0.6s ease-out forwards;
-  }
-  @keyframes monoFlare{
-    0%{ filter:drop-shadow(0 2px 3px rgba(150,110,50,0.28)) drop-shadow(0 0 12px rgba(226,190,116,0.25)); }
-    45%{ filter:drop-shadow(0 2px 4px rgba(150,110,50,0.35)) drop-shadow(0 0 34px rgba(255,235,180,0.95)); }
-    100%{ filter:drop-shadow(0 2px 3px rgba(150,110,50,0.28)) drop-shadow(0 0 16px rgba(226,190,116,0.35)); }
-  }
-  #envelope-screen.dissolving #envelope-hint{ opacity:0; }
-  #envelope-screen.dissolving .intro-wash,
-  #envelope-screen.dissolving .intro-rays,
-  #envelope-screen.dissolving .intro-glow,
-  #envelope-screen.dissolving .intro-petals{
-    opacity:0; transition:opacity 1.1s ease 0.55s;
-  }
+  @keyframes hintPulse{ 0%,100%{ opacity:.55; } 50%{ opacity:1; } }
+  #envelope-screen.opening #envelope-hint{ animation:none; opacity:0; }
 
   #music-mini{
     position:fixed; bottom:22px; right:22px; z-index:70;
@@ -332,18 +172,10 @@
   #music-mini.playing .note{ animation:noteSpin 3s linear infinite; display:inline-block; }
   @keyframes noteSpin{ from{ transform:rotate(0deg);} to{ transform:rotate(360deg);} }
 
-  @media (max-width:560px){
-    .intro-card{ width:min(88vw, 360px); border-radius:18px; }
-    .intro-card::before, .intro-card::after{ border-radius:18px; }
-  }
-
   @media (prefers-reduced-motion: reduce){
-    .intro-wash, .intro-rays, .intro-glow, .intro-card, .intro-card::before,
-    .intro-card::after, .intro-monogram, .mono-shine::before, .intro-petal,
-    .intro-mote, .intro-shard, #envelope-hint{
-      animation:none !important;
-    }
-    #envelope-screen.dissolving .intro-card{ opacity:0; transition:opacity 0.4s ease; }
+    #envelope-hint{ animation:none; }
+    #envelope-screen.opening .env-wrap{ animation:none; opacity:0; transition:opacity .4s ease; }
+    .env-flap, .env-seal{ transition:none; }
   }
 
   .petal{
@@ -464,44 +296,6 @@
   .together-line strong{ font-family:'Cormorant Garamond', serif; font-size:1.35rem; color:var(--plum); font-weight:600; }
 
 
-  /* ---------- Story timeline ---------- */
-  .timeline{ position:relative; max-width:640px; margin:44px auto 0; padding-left:44px; }
-  .timeline-vine{ position:absolute; left:13px; top:6px; bottom:6px; width:2px; }
-  .timeline-vine path{ fill:none; stroke:var(--pink-deep); stroke-width:2; stroke-dasharray:1000; stroke-dashoffset:1000; transition:stroke-dashoffset 1.6s ease; }
-  .timeline-vine.in path{ stroke-dashoffset:0; }
-  .tl-item{ position:relative; padding-bottom:40px; }
-  .tl-item:last-child{ padding-bottom:0; }
-  .tl-dot{
-    position:absolute; left:-44px; top:4px; width:26px; height:26px; border-radius:50%;
-    background:var(--white); border:2px solid var(--pink-deep); display:flex; align-items:center; justify-content:center;
-    font-size:0.9rem;
-  }
-  .tl-date{ font-family:'Jost', sans-serif; font-size:0.72rem; letter-spacing:0.2em; text-transform:uppercase; color:var(--pink-deep); }
-  .tl-title{ font-size:1.7rem; margin:6px 0 8px; }
-  .tl-text{ opacity:0.85; max-width:480px; }
-  .tl-highlight{
-    display:inline-block; margin-top:10px; font-family:'Jost', sans-serif; font-size:0.72rem;
-    letter-spacing:0.05em; background:var(--butter); color:var(--plum); padding:6px 12px; border-radius:20px;
-  }
-
-  /* ---------- Quiz ---------- */
-  .quiz-section{ background:linear-gradient(160deg, var(--mint) 0%, var(--butter) 100%); }
-  .quiz-grid{ display:grid; grid-template-columns:repeat(auto-fit, minmax(210px, 1fr)); gap:20px; margin-top:34px; }
-  .flip-card{ perspective:1200px; height:190px; }
-  .flip-inner{ position:relative; width:100%; height:100%; transition:transform 0.7s cubic-bezier(.2,.8,.2,1); transform-style:preserve-3d; }
-  .flip-card.flipped .flip-inner{ transform:rotateY(180deg); }
-  .flip-face{
-    position:absolute; inset:0; backface-visibility:hidden; border-radius:16px; padding:22px;
-    display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center;
-    box-shadow:0 10px 26px rgba(75,59,84,0.12);
-  }
-  .flip-front{ background:var(--white); }
-  .flip-back{ background:var(--plum); color:var(--cream); transform:rotateY(180deg); }
-  .flip-q{ font-family:'Jost', sans-serif; font-size:0.72rem; letter-spacing:0.1em; text-transform:uppercase; color:var(--pink-deep); margin-bottom:10px; }
-  .flip-front .flip-text{ font-size:1.25rem; }
-  .flip-back .flip-text{ font-size:1.15rem; }
-  .flip-tap{ margin-top:14px; font-family:'Jost', sans-serif; font-size:0.62rem; letter-spacing:0.16em; text-transform:uppercase; opacity:0.5; }
-
   /* ---------- Seal ---------- */
   .seal-section{ background:var(--cream); }
   .seal{
@@ -621,49 +415,30 @@
     .countdown-grid{ gap:10px; }
     .count-card{ padding:18px 4px; }
     section{ padding:54px 18px; }
-    .timeline{ padding-left:38px; }
-    .tl-dot{ left:-38px; }
   }
 </style>
 </head>
 <body class="locked">
 
-<div id="envelope-screen" role="button" tabindex="0" aria-label="Enter the wedding invitation">
+<div id="envelope-screen">
+  <div class="env-grain" aria-hidden="true"></div>
+  <div class="env-inner">
+    <p class="env-date">29TH DECEMBER 2026</p>
 
-  <!-- ambient background layers -->
-  <div class="intro-wash" aria-hidden="true"></div>
-  <div class="intro-rays" aria-hidden="true"></div>
-  <div class="intro-glow" aria-hidden="true"></div>
-  <div class="intro-petals" id="intro-petals" aria-hidden="true"></div>
-  <div class="intro-dust" id="intro-dust" aria-hidden="true"></div>
-
-  <!-- frosted glass invitation card -->
-  <div class="intro-stage">
-    <div class="intro-card" id="intro-card">
-      <div class="intro-monogram">
-        <span class="mono-k">K</span>
-        <span class="mono-amp">&amp;</span>
-        <span class="mono-v">V</span>
-        <span class="mono-shine" aria-hidden="true"></span>
+    <button class="env-wrap" id="open-invite" type="button" aria-label="Open the wedding invitation">
+      <div class="env">
+        <div class="env-body"></div>
+        <div class="env-flap"></div>
+        <div class="env-liner"></div>
+        <div class="env-lace env-lace-top"></div>
+        <div class="env-lace env-lace-left"></div>
+        <div class="env-lace env-lace-right"></div>
+        <div class="env-seal">K&amp;V</div>
       </div>
+    </button>
 
-      <div class="intro-rule" aria-hidden="true"></div>
-
-      <p class="intro-invite">
-        Together with their families<br>
-        joyfully invite you to celebrate<br>
-        their wedding
-      </p>
-
-      <p class="intro-names">Keenan &amp; Vania</p>
-      <p class="intro-date">29 December 2026</p>
-    </div>
+    <p id="envelope-hint">Tap the envelope to open</p>
   </div>
-
-  <!-- glass dissolves into these on click -->
-  <div class="intro-shards" id="intro-shards" aria-hidden="true"></div>
-
-  <p id="envelope-hint">Tap anywhere to begin</p>
 </div>
 
 <div id="yt-player-box" style="position:absolute; width:1px; height:1px; overflow:hidden; opacity:0; pointer-events:none;">
@@ -709,102 +484,6 @@
     </div>
     <p class="countdown-note">until Keenan &amp; Vania say their vows</p>
     <p class="together-line">they've been writing their love story for <strong id="together-days">—</strong> days — ever since two school kids became each other's favourite person</p>
-  </div>
-</section>
-
-<!-- STORY -->
-<section class="story-section" style="background:var(--cream);">
-  <div class="wrap center reveal">
-    <p class="eyebrow section-kicker">Their story, so far</p>
-    <h2 class="section-title">From classmates to forever</h2>
-  </div>
-  <div class="timeline">
-    <svg class="timeline-vine" id="tl-vine" viewBox="0 0 2 100" preserveAspectRatio="none">
-      <path d="M 1 0 L 1 100" />
-    </svg>
-
-    <div class="tl-item reveal">
-      <div class="tl-dot">🏠</div>
-      <p class="tl-date">The first hello</p>
-      <h3 class="tl-title">A Meeting at Seanne's House</h3>
-      <p class="tl-text">Vania's cousin and Keenan's friend, Seanne unknowingly set everything in motion — Keenan was smitten from the start. They soon discovered they went to the very same school: different classrooms, same corridors, and a liking that quickly became mutual.</p>
-    </div>
-
-    <div class="tl-item reveal">
-      <div class="tl-dot">💌</div>
-      <p class="tl-date">1 August 2012</p>
-      <h3 class="tl-title">Made It Official</h3>
-      <p class="tl-text">Friendship quietly turned into something more, and they officially started dating — the beginning of everything that followed.</p>
-    </div>
-
-    <div class="tl-item reveal">
-      <div class="tl-dot">💍</div>
-      <p class="tl-date">1 August 2024</p>
-      <h3 class="tl-title">The Proposal</h3>
-      <p class="tl-text">Twelve years to the very day they started dating, Keenan got down on one knee — and Vania said yes.</p>
-      <span class="tl-highlight">✦ Exactly 12 years to the day ✦</span>
-    </div>
-
-    <div class="tl-item reveal">
-      <div class="tl-dot">💒</div>
-      <p class="tl-date">29 December 2026</p>
-      <h3 class="tl-title">The Wedding</h3>
-      <p class="tl-text">Keenan and Vania exchange vows and become husband and wife, surrounded by the people who love them most.</p>
-    </div>
-  </div>
-</section>
-
-<!-- QUIZ -->
-<section class="quiz-section">
-  <div class="wrap center reveal">
-    <p class="eyebrow section-kicker">A little game</p>
-    <h2 class="section-title">How well do you know Keenan &amp; Vania?</h2>
-    <p style="opacity:0.75; margin-top:6px;">Tap a card to flip it and find out</p>
-
-    <div class="quiz-grid">
-      <div class="flip-card" tabindex="0" role="button" aria-label="Flip card">
-        <div class="flip-inner">
-          <div class="flip-face flip-front">
-            <p class="flip-q">Question 1</p>
-            <p class="flip-text">Where did Keenan &amp; Vania first meet?</p>
-            <p class="flip-tap">tap to reveal</p>
-          </div>
-          <div class="flip-face flip-back">
-            <p class="flip-q">Answer</p>
-            <p class="flip-text">At Seanne's house — Vania's cousin, and Keenan's friend! 🏠 Turned out they went to the same school too.</p>
-          </div>
-        </div>
-      </div>
-
-      <div class="flip-card" tabindex="0" role="button" aria-label="Flip card">
-        <div class="flip-inner">
-          <div class="flip-face flip-front">
-            <p class="flip-q">Question 2</p>
-            <p class="flip-text">When did they start dating?</p>
-            <p class="flip-tap">tap to reveal</p>
-          </div>
-          <div class="flip-face flip-back">
-            <p class="flip-q">Answer</p>
-            <p class="flip-text">1st August 2012 💌</p>
-          </div>
-        </div>
-      </div>
-
-      <div class="flip-card" tabindex="0" role="button" aria-label="Flip card">
-        <div class="flip-inner">
-          <div class="flip-face flip-front">
-            <p class="flip-q">Question 3</p>
-            <p class="flip-text">What's special about the proposal date?</p>
-            <p class="flip-tap">tap to reveal</p>
-          </div>
-          <div class="flip-face flip-back">
-            <p class="flip-q">Answer</p>
-            <p class="flip-text">Keenan proposed exactly 12 years to the day they got together 💍✨</p>
-          </div>
-        </div>
-      </div>
-
-    </div>
   </div>
 </section>
 
@@ -918,15 +597,11 @@
 </div>
 
 <script>
-  // ---------- Luxury intro + background music ----------
+  // ---------- Envelope intro + background music ----------
   const introScreen  = document.getElementById('envelope-screen');
-  const introCard    = document.getElementById('intro-card');
-  const introHint    = document.getElementById('envelope-hint');
+  const openBtn      = document.getElementById('open-invite');
   const siteContent  = document.getElementById('site-content');
   const musicMini    = document.getElementById('music-mini');
-  const petalLayer   = document.getElementById('intro-petals');
-  const dustLayer    = document.getElementById('intro-dust');
-  const shardLayer   = document.getElementById('intro-shards');
 
   const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -965,143 +640,34 @@
     musicMini.querySelector('.note').textContent = '\u{1F3B5}';
   }
 
-  /* ---- Ambient petals + dust motes (drift continuously before the click) ---- */
-  const PETAL_TINTS = ['#F7CBDD', '#E8CFEF', '#FBE3D3', '#EFD9F0'];
-
-  function buildAmbience(){
-    if(prefersReducedMotion) return;
-    const isNarrow   = window.innerWidth < 600;
-    const petalCount = isNarrow ? 9  : 16;
-    const dustCount  = isNarrow ? 14 : 24;
-
-    for(let i = 0; i < petalCount; i++){
-      const petal = document.createElement('div');
-      petal.className = 'intro-petal';
-      const size = 7 + Math.random() * 9;
-      petal.style.left              = (Math.random() * 100) + 'vw';
-      petal.style.width             = size + 'px';
-      petal.style.height            = (size * 1.25) + 'px';
-      petal.style.background        = PETAL_TINTS[Math.floor(Math.random() * PETAL_TINTS.length)];
-      petal.style.animationDuration = (18 + Math.random() * 16) + 's';
-      petal.style.animationDelay    = (Math.random() * -30) + 's';
-      petal.style.setProperty('--drift', (Math.random() * 90 - 45) + 'px');
-      petalLayer.appendChild(petal);
-    }
-
-    for(let i = 0; i < dustCount; i++){
-      const mote = document.createElement('div');
-      mote.className = 'intro-mote';
-      const size = 2 + Math.random() * 3;
-      mote.style.left              = (Math.random() * 100) + '%';
-      mote.style.top               = (35 + Math.random() * 65) + '%';
-      mote.style.width             = size + 'px';
-      mote.style.height            = size + 'px';
-      mote.style.animationDuration = (11 + Math.random() * 10) + 's';
-      mote.style.animationDelay    = (Math.random() * -18) + 's';
-      mote.style.setProperty('--mx', (Math.random() * 70 - 35) + 'px');
-      mote.style.setProperty('--my', (-90 - Math.random() * 90) + 'px');
-      dustLayer.appendChild(mote);
-    }
-  }
-  buildAmbience();
-
-  /* ---- Glass dissolve: spawn glowing particles across the card's footprint ---- */
-  function dissolveIntoParticles(){
-    if(prefersReducedMotion) return;
-    const cardRect   = introCard.getBoundingClientRect();
-    const layerRect  = shardLayer.getBoundingClientRect();
-    const count      = window.innerWidth < 600 ? 110 : 190;
-
-    const frag = document.createDocumentFragment();
-    for(let i = 0; i < count; i++){
-      const shard = document.createElement('div');
-      shard.className = 'intro-shard';
-
-      // seed each particle at a random point within the card itself
-      const x = cardRect.left - layerRect.left + Math.random() * cardRect.width;
-      const y = cardRect.top  - layerRect.top  + Math.random() * cardRect.height;
-      const size = 1.5 + Math.random() * 4;
-
-      // drift outward from the card's centre
-      const angle    = Math.atan2(y - (cardRect.top - layerRect.top + cardRect.height / 2),
-                                  x - (cardRect.left - layerRect.left + cardRect.width / 2));
-      const distance = 70 + Math.random() * 260;
-
-      shard.style.left   = x + 'px';
-      shard.style.top    = y + 'px';
-      shard.style.width  = size + 'px';
-      shard.style.height = size + 'px';
-      shard.style.setProperty('--sx', (Math.cos(angle) * distance).toFixed(1) + 'px');
-      shard.style.setProperty('--sy', (Math.sin(angle) * distance - 30).toFixed(1) + 'px');
-      shard.style.animationDuration = (0.9 + Math.random() * 0.7) + 's';
-      shard.style.animationDelay    = (Math.random() * 0.35) + 's';
-
-      frag.appendChild(shard);
-    }
-    shardLayer.appendChild(frag);
-
-    requestAnimationFrame(() => {
-      shardLayer.querySelectorAll('.intro-shard').forEach(s => s.classList.add('fly'));
-    });
-  }
-
-  /* ---- The opening sequence (~2s) ----
-       0.00s  monogram flares
-       0.32s  glass card scales to 95% and dissolves
-       0.35s  particles bloom outward
-       0.55s  ambient background layers fade
-       2.00s  intro clears, wedding site fades in underneath          */
+  /* ---- The opening sequence (~1.9s)
+       0.0s  flap lifts, seal fades, music starts
+       0.8s  envelope floats up and fades
+       1.9s  intro clears, wedding site fades in underneath        */
   function beginExperience(){
     if(opened) return;
     opened = true;
 
-    introScreen.classList.add('dissolving');
+    openBtn.classList.add('open');
+    introScreen.classList.add('opening');
     introScreen.style.cursor = 'default';
+    openBtn.blur();
     startMusic();
     musicMini.classList.add('show');
-
-    setTimeout(dissolveIntoParticles, 350);
 
     setTimeout(() => {
       introScreen.classList.add('hidden');
       siteContent.classList.add('visible');
       document.body.classList.remove('locked');
-    }, 2000);
+    }, prefersReducedMotion ? 600 : 1900);
   }
 
+  // one listener covers a click on the envelope (or Enter/Space on it) and a tap anywhere on the screen
   introScreen.addEventListener('click', beginExperience);
-  introScreen.addEventListener('keydown', (e) => {
-    if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); beginExperience(); }
-  });
 
   musicMini.addEventListener('click', () => {
     musicMini.classList.contains('playing') ? stopMusic() : startMusic();
   });
-
-  /* ---- Desktop-only 3D tilt on the glass card (skipped on touch devices) ---- */
-  if(window.matchMedia('(hover: hover)').matches && !prefersReducedMotion){
-    let tilting = false;
-
-    introScreen.addEventListener('mousemove', (e) => {
-      if(opened || tilting) return;
-      tilting = true;
-      requestAnimationFrame(() => {
-        const rect = introCard.getBoundingClientRect();
-        const px = (e.clientX - (rect.left + rect.width  / 2)) / (window.innerWidth  / 2);
-        const py = (e.clientY - (rect.top  + rect.height / 2)) / (window.innerHeight / 2);
-        introCard.style.transform =
-          `rotateX(${(-py * 5).toFixed(2)}deg) rotateY(${(px * 5).toFixed(2)}deg) translateZ(0)`;
-        introCard.style.animationPlayState = 'paused';
-        tilting = false;
-      });
-    });
-
-    introScreen.addEventListener('mouseleave', () => {
-      if(opened) return;
-      introCard.style.transform = '';
-      introCard.style.animationPlayState = '';
-    });
-  }
 
   // ---------- Countdown ----------
   const weddingDate = new Date("2026-12-29T00:00:00+05:30").getTime();
@@ -1131,26 +697,11 @@
 
   // ---------- Scroll reveal ----------
   const revealEls = document.querySelectorAll('.reveal');
-  const vine = document.getElementById('tl-vine');
 
   const io = new IntersectionObserver((entries)=>{
     entries.forEach(e=>{ if(e.isIntersecting) e.target.classList.add('in'); });
   }, { threshold:0.2 });
   revealEls.forEach(el=>io.observe(el));
-
-  const vineIo = new IntersectionObserver((entries)=>{
-    entries.forEach(e=>{ if(e.isIntersecting) vine.classList.add('in'); });
-  }, { threshold:0.1 });
-  vineIo.observe(vine);
-
-  // ---------- Flip cards ----------
-  document.querySelectorAll('.flip-card').forEach(card=>{
-    const toggle = ()=> card.classList.toggle('flipped');
-    card.addEventListener('click', toggle);
-    card.addEventListener('keydown', (e)=>{
-      if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); toggle(); }
-    });
-  });
 
   // ---------- Ambient drifting confetti ----------
   const field = document.getElementById('petal-field');
